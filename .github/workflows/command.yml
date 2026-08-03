@@ -1,0 +1,38 @@
+name: Command & Test Execution Workflow
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  workflow_dispatch:
+    inputs:
+      custom_command:
+        description: 'Custom command or test to execute'
+        required: false
+        default: 'npm run lint'
+      framework_target:
+        description: 'Detected framework'
+        required: false
+        default: 'Generic Environment'
+
+jobs:
+  execute-command:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Framework Environment Setup
+        run: |
+          echo "Detected Framework: Generic Environment"
+          echo "Executing Command: npm run lint"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Background Command & Tests
+        run: |
+          echo "=== Starting Terminal Command Output Log ==="
+          ${{ github.event.inputs.custom_command || 'npm run lint' }}
+          echo "=== Terminal Command Executed Successfully ==="

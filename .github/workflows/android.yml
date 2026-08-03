@@ -1,0 +1,49 @@
+name: React Vite Web Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+env:
+  ACTIONS_AUDIT_NODE_VERSION: 'false'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies
+      run: npm install || npm install --legacy-peer-deps
+
+    - name: Build React Vite App (npm run esbuild / build)
+      run: |
+        if grep -q '"esbuild"' package.json; then
+          npm run esbuild
+        else
+          npm run build
+        fi
+
+    - name: Prepare Web Dist Artifact
+      run: |
+        mkdir -p web-dist
+        if [ -d "dist" ]; then
+          cp -r dist/* web-dist/
+        elif [ -d "build" ]; then
+          cp -r build/* web-dist/
+        else
+          cp -r * web-dist/ 2>/dev/null || true
+        fi
+        cd web-dist && zip -r ../web-dist.zip ./* && cd ..
+
+    - name: Upload Web Dist Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-dist
+        path: web-dist.zip

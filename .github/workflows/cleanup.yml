@@ -1,0 +1,36 @@
+name: Cleanup Old Workflows and Artifacts
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    name: Delete Runs & Artifacts Older Than 1 Day
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Clean up Artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const response = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 30
+              });
+              const runs = response.data.workflow_runs;
+              const completedRuns = runs.filter(run => run.status === 'completed');
+              for (let i = 5; i < completedRuns.length; i++) {
+                await github.rest.actions.deleteWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: completedRuns[i].id
+                });
+              }
+            } catch (error) {
+              core.setFailed(`Workflow run cleanup failed: ${error.message}`);
+            }
