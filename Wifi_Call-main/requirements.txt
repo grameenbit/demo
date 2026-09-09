@@ -1,0 +1,14 @@
+# WiFiCall - Core Dependencies
+# ============================
+# Install one of the backends below depending on your use case:
+
+# Backend 1: Twilio (recommended - call real phone numbers)
+twilio>=9.0.0
+
+# Backend 2: Pure SIP (no compilation needed)
+simple-sip-client>=0.0.3                                                
+# Backend 3: Async SIP
+sipx>=4.0.0
+
+# Backend 4: PJSIP (requires compiled C libraries)
+# pjsua2 - must be compiled from source, see docs
